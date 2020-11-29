@@ -1,13 +1,11 @@
 #include "credentials.h"
+#include "form_filler.h"
 
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
 
-const std::string serverName = "https://docs.google.com/forms/d/e/" + google_form_id + "/formResponse";
-
+formFiller form_filler(google_form_id);
 
 unsigned long lastTime = 0;
-
 unsigned long timerDelay = 60000;
 
 
@@ -32,21 +30,7 @@ void loop() {
     //Check WiFi connection status
     if (WiFi.status() == WL_CONNECTED) {
 
-      HTTPClient http;
-      WiFiClientSecure client;
-      
-      client.setInsecure();
-      auto resp =  client.connect(serverName.c_str(), 443);
-      http.begin(client, serverName.c_str());
-
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-      resp = http.POST("entry.20675324=11");
-
-      Serial.print("post response:");
-      Serial.print((resp));
-      Serial.println(http.errorToString(resp));
-
-      http.end();
+      form_filler.sendData(String(15.3));
     }
     else {
       Serial.println("WiFi Disconnected");
