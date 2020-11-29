@@ -3,10 +3,13 @@
 
 #include <ESP8266WiFi.h>
 
-formFiller form_filler(google_form_id);
+formFiller form_filler(google_form_id,
+                       "entry.851959826",
+                       "entry.1563906843",
+                       "entry.1884689726");
 
 unsigned long lastTime = 0;
-unsigned long timerDelay = 60000;
+unsigned long timerDelay = 20000;
 
 
 void setup() {
