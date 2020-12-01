@@ -1,10 +1,10 @@
 #include "credentials.h"
 #include "form_filler.h"
+#include "analogRead.h"
 
 #include <ESP8266WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-
 
 formFiller form_filler(google_form_id,
                        "entry.851959826",
@@ -38,8 +38,10 @@ void loop() {
       uint8_t device_count = temperature_sensor.getDS18Count();
       if (1 == device_count)
       {
-        temperature_sensor.requestTemperatures();
+        float voltage = getSupplyVoltage();
+        Serial.println(voltage);
 
+        temperature_sensor.requestTemperatures();
         float temperature = temperature_sensor.getTempCByIndex(0);
         Serial.println(temperature);
         form_filler.sendData(String(temperature));
@@ -48,7 +50,6 @@ void loop() {
       {
         Serial.println("No 1DS8B20 sensor detected.");
       }
-
     }
     else {
       Serial.println("WiFi Disconnected");
