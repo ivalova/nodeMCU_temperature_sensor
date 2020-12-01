@@ -5,18 +5,24 @@
 #include <ESP8266WiFi.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+
+
+unsigned long last_time_s{0};
+unsigned long timer_period_s{120};
+const uint8_t temperature_sensor_pin{13};
 
 formFiller form_filler(google_form_id,
                        "entry.851959826",
                        "entry.1563906843",
                        "entry.1884689726");
 
-const uint8_t temperature_sensor_pin{13};
 OneWire one_wire(temperature_sensor_pin);
 DallasTemperature temperature_sensor(&one_wire);
+WiFiUDP ntp_udp;
+NTPClient time_client(ntp_udp);
 
-unsigned long last_time = 0;
-unsigned long timer_delay = 300000;
 
 void connectToWiFi(void);
 
@@ -25,38 +31,47 @@ void setup() {
 
   WiFi.begin(ssid, password);
   connectToWiFi();
+
+  time_client.begin();
 }
 
 void loop() {
 
-  if ((millis() - last_time) > timer_delay) {
+  //Check WiFi connection status
+  if (WiFi.status() == WL_CONNECTED) {
 
-    //Check WiFi connection status
-    if (WiFi.status() == WL_CONNECTED) {
+    temperature_sensor.begin();
+    uint8_t device_count = temperature_sensor.getDS18Count();
+    if (1 == device_count)
+    {
+      float voltage = getSupplyVoltage();
+      Serial.print("Voltage: ");
+      Serial.println(voltage);
 
-      temperature_sensor.begin();
-      uint8_t device_count = temperature_sensor.getDS18Count();
-      if (1 == device_count)
-      {
-        float voltage = getSupplyVoltage();
-        Serial.println(voltage);
-
-        temperature_sensor.requestTemperatures();
-        float temperature = temperature_sensor.getTempCByIndex(0);
-        Serial.println(temperature);
-        form_filler.sendData(String(temperature));
-      }
-      else
-      {
-        Serial.println("No 1DS8B20 sensor detected.");
-      }
+      temperature_sensor.requestTemperatures();
+      float temperature = temperature_sensor.getTempCByIndex(0);
+      Serial.print("Temperature: ");
+      Serial.println(temperature);
+      form_filler.sendData(String(temperature));
     }
-    else {
-      Serial.println("WiFi Disconnected");
-      connectToWiFi();
+    else
+    {
+      Serial.println("No 1DS8B20 sensor detected.");
     }
-    last_time = millis();
   }
+  else {
+    Serial.println("WiFi Disconnected");
+    connectToWiFi();
+  }
+
+  time_client.forceUpdate();//todo evaluate retval
+  Serial.print("Time: ");
+  Serial.println(time_client.getFormattedTime());
+  unsigned long sleep_time_s = timer_period_s - (time_client.getEpochTime() % timer_period_s);
+  Serial.print("Sleeping for ");
+  Serial.print(sleep_time_s);
+  Serial.println(" seconds...");
+  delay(sleep_time_s * 1000);
 }
 
 void connectToWiFi(void)
