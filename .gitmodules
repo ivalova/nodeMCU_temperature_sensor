@@ -1,3 +1,0 @@
-[submodule "temperature_measurement"]
-	path = temperature_measurement
-	url = https://github.com/ivalova/temperature_measurement.git

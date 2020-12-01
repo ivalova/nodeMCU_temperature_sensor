@@ -2,14 +2,21 @@
 #include "form_filler.h"
 
 #include <ESP8266WiFi.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 
 formFiller form_filler(google_form_id,
                        "entry.851959826",
                        "entry.1563906843",
                        "entry.1884689726");
 
-unsigned long lastTime = 0;
-unsigned long timerDelay = 20000;
+const uint8_t temperature_sensor_pin{13};
+OneWire one_wire(temperature_sensor_pin);
+DallasTemperature temperature_sensor(&one_wire);
+
+unsigned long last_time = 0;
+unsigned long timer_delay = 2000;
 
 
 void setup() {
@@ -28,16 +35,30 @@ void setup() {
 
 void loop() {
 
-  if ((millis() - lastTime) > timerDelay) {
+  if ((millis() - last_time) > timer_delay) {
 
     //Check WiFi connection status
     if (WiFi.status() == WL_CONNECTED) {
 
-      form_filler.sendData(String(15.3));
+      temperature_sensor.begin();
+      uint8_t device_count = temperature_sensor.getDS18Count();
+      if (1 == device_count)
+      {
+        temperature_sensor.requestTemperatures();
+
+        float temperature = temperature_sensor.getTempCByIndex(0);
+        Serial.println(temperature);
+        form_filler.sendData(String(temperature));
+      }
+      else
+      {
+        Serial.println("No 1DS8B20 sensor detected.");
+      }
+
     }
     else {
       Serial.println("WiFi Disconnected");
     }
-    lastTime = millis();
+    last_time = millis();
   }
 }
