@@ -20,10 +20,14 @@ void formFiller::sendData(const String& temperature, const String& humidity, con
   HTTPClient http;
   WiFiClientSecure client;
 
-  Serial.println("Sending data to: " + server_name);
+  Serial.println("Connecting to: " + server_name);
 
   client.setInsecure();
   auto resp =  client.connect(server_name.c_str(), 443);
+
+  Serial.print("SSL response: ");
+  Serial.println(resp); 
+  
   http.begin(client, server_name.c_str());
 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -32,13 +36,21 @@ void formFiller::sendData(const String& temperature, const String& humidity, con
                      humidity_id + "=" +  humidity + "&" +
                      pressure_id + "=" +  pressure + "&";
 
-  Serial.println("data:" + body_data);
+  Serial.println("data :" + body_data);
 
   resp = http.POST(body_data);
 
-  Serial.print("post response:");
-  Serial.print((resp));
-  Serial.println(http.errorToString(resp));
+  if (200 == resp)
+  {
+    Serial.println("Success!");
+  }
+  else
+  {
+    Serial.print("Error sending data to the cloud! Response: ");
+    Serial.println((resp));
+    Serial.println(http.errorToString(resp));
+  }
+
 
   http.end();
 }

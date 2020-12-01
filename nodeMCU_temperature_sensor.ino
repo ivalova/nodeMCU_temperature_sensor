@@ -16,21 +16,15 @@ OneWire one_wire(temperature_sensor_pin);
 DallasTemperature temperature_sensor(&one_wire);
 
 unsigned long last_time = 0;
-unsigned long timer_delay = 2000;
+unsigned long timer_delay = 300000;
 
+void connectToWiFi(void);
 
 void setup() {
   Serial.begin(115200);
 
   WiFi.begin(ssid, password);
-  Serial.println("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
+  connectToWiFi();
 }
 
 void loop() {
@@ -58,7 +52,20 @@ void loop() {
     }
     else {
       Serial.println("WiFi Disconnected");
+      connectToWiFi();
     }
     last_time = millis();
   }
+}
+
+void connectToWiFi(void)
+{
+  Serial.println("Connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected! IP Address: ");
+  Serial.println(WiFi.localIP());
 }
