@@ -14,6 +14,7 @@ unsigned long timer_period_s{120};
 const uint8_t temperature_sensor_pin{13};
 
 formFiller form_filler(google_form_id,
+                       "entry.20675324",
                        "entry.851959826",
                        "entry.1563906843",
                        "entry.1884689726");
@@ -50,7 +51,7 @@ void loop() {
       float temperature = temperature_sensor.getTempCByIndex(0);
       Serial.print("Temperature: ");
       Serial.println(temperature);
-      form_filler.sendData(String(temperature));
+      form_filler.sendData(String(voltage),String(temperature));
     }
     else
     {
