@@ -42,7 +42,7 @@ void formFiller::sendData(const String& temperature, const String& humidity, con
 
   if (200 == resp)
   {
-    Serial.println("Success!");
+    Serial.println("Data successfuly sent!");
   }
   else
   {

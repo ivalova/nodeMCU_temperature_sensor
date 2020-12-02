@@ -29,14 +29,12 @@ void connectToWiFi(void);
 void setup() {
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
   connectToWiFi();
 
   time_client.begin();
 }
 
 void loop() {
-
   //Check WiFi connection status
   if (WiFi.status() == WL_CONNECTED) {
 
@@ -60,7 +58,7 @@ void loop() {
     }
   }
   else {
-    Serial.println("WiFi Disconnected");
+    Serial.println("WiFi Disconnected!");
     connectToWiFi();
   }
 
@@ -68,20 +66,26 @@ void loop() {
   Serial.print("Time: ");
   Serial.println(time_client.getFormattedTime());
   unsigned long sleep_time_s = timer_period_s - (time_client.getEpochTime() % timer_period_s);
+
   Serial.print("Sleeping for ");
   Serial.print(sleep_time_s);
   Serial.println(" seconds...");
-  delay(sleep_time_s * 1000);
+
+  ESP.deepSleep(sleep_time_s * 1e6); //deepSleep receives us
 }
 
 void connectToWiFi(void)
 {
-  Serial.println("Connecting");
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to wifi ");
+  Serial.println(ssid);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println("");
-  Serial.print("Connected! IP Address: ");
+  Serial.print("Connected to ");
+  Serial.println(ssid);
+  Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 }
