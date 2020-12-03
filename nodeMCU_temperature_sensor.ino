@@ -8,10 +8,8 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-
-unsigned long last_time_s{0};
 unsigned long timer_period_s{120};
-const uint8_t temperature_sensor_pin{13};
+const uint8_t temperature_sensor_pin{D7};
 
 formFiller form_filler(google_form_id,
                        "entry.20675324",
