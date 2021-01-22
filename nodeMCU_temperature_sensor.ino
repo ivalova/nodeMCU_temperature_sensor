@@ -74,7 +74,7 @@ void loop() {
   Serial.print(sleep_time_s);
   Serial.println(" seconds...");
 
-  ESP.deepSleep(timer_period_s * 1e6); //deepSleep receives us
+  ESP.deepSleep(sleep_time_s * 1e6); //deepSleep receives us
 }
 
 void connectToWiFi(void)
