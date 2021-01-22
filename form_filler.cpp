@@ -3,25 +3,30 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <HardwareSerial.h>
+#include <EEPROM.h>
 
 formFiller::formFiller(const String& form_id,
-                       const String& voltage_id,
-                       const String& temperature_id,
-                       const String& humidity_id,
-                       const String& pressure_id)
+                       const String& device_html_id,
+                       const String& voltage_html_id,
+                       const String& temperature_html_id,
+                       const String& humidity_html_id,
+                       const String& pressure_html_id)
   : server_name("https://docs.google.com/forms/d/e/" + form_id + "/formResponse"),
-    voltage_id(voltage_id),
-    temperature_id(temperature_id),
-    humidity_id(humidity_id),
-    pressure_id(pressure_id)
+    device_html_id(device_html_id),
+    voltage_html_id(voltage_html_id),
+    temperature_html_id(temperature_html_id),
+    humidity_html_id(humidity_html_id),
+    pressure_html_id(pressure_html_id)
 {
+  EEPROM.begin(1);  
+  device_id = String(EEPROM.read(device_id_EEPROM_address));
 }
 
 void formFiller::sendData(const String& voltage,
                           const String& temperature,
                           const String& humidity,
                           const String& pressure)
-{
+{    
   HTTPClient http;
   WiFiClientSecure client;
 
@@ -37,10 +42,11 @@ void formFiller::sendData(const String& voltage,
 
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-  String body_data = voltage_id + "=" +  voltage + "&" + \
-                     temperature_id + "=" +  temperature + "&" + \
-                     humidity_id + "=" +  humidity + "&" +
-                     pressure_id + "=" +  pressure;
+  String body_data = device_html_id + "=" +  device_id + "&" + \
+                     voltage_html_id + "=" +  voltage + "&" + \
+                     temperature_html_id + "=" +  temperature + "&" + \
+                     humidity_html_id + "=" +  humidity + "&" +
+                     pressure_html_id + "=" +  pressure;
 
   Serial.println("data :" + body_data);
 
