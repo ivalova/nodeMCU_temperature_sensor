@@ -9,7 +9,7 @@
 #include <NTPClient.h>
 
 const uint8_t sensor_address{0x76}; //bmp280 address
-const unsigned long timer_period_s{120};
+const unsigned long timer_period_s{600};
 
 
 formFiller form_filler(google_form_id,
