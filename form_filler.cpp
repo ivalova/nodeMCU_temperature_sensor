@@ -36,7 +36,7 @@ void formFiller::sendData(const String& voltage,
   auto resp =  client.connect(server_name.c_str(), 443);
 
   Serial.print("SSL response: ");
-  Serial.println(resp);
+  Serial.println(resp);//todo 0 if fail
 
   http.begin(client, server_name.c_str());
 
