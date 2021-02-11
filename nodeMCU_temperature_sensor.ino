@@ -8,7 +8,6 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-const uint8_t sensor_address{0x38}; //aht10 address
 const unsigned long timer_period_s{600};
 
 
