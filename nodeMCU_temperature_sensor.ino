@@ -1,4 +1,4 @@
-#include "credentials.h"
+#include "configuration.h"
 #include "form_filler.h"
 #include "analogRead.h"
 
@@ -8,10 +8,9 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-const unsigned long timer_period_s{600};
 
 
-formFiller form_filler(google_form_id,
+formFiller form_filler((const char*)&(Configuration::Instance().getConfigData().google_form_id[0]),
                        "entry.1308355757",
                        "entry.20675324",
                        "entry.851959826",
@@ -73,6 +72,9 @@ void loop() {
   time_client.forceUpdate();//todo evaluate retval
   Serial.print("Time: ");
   Serial.println(time_client.getFormattedTime());
+
+  const unsigned long timer_period_s = Configuration::Instance().getConfigData().update_interval_s;
+  
   unsigned long sleep_time_s = timer_period_s - (time_client.getEpochTime() % timer_period_s);
 
   Serial.print("Sleeping for ");
@@ -84,6 +86,8 @@ void loop() {
 
 void connectToWiFi(void)
 {
+  const char* ssid = (const char*)&(Configuration::Instance().getConfigData().wifi_ssid[0]);
+  const char* password = (const char*)&(Configuration::Instance().getConfigData().wifi_password[0]);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to wifi ");
   Serial.println(ssid);
