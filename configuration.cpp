@@ -19,7 +19,7 @@ Configuration::Configuration()
   EEPROM.get(EEPROM_START_ADDRESS, configuration_data);
 }
 
-ConfigurationData Configuration::getConfigData()
+ConfigurationData Configuration::getConfigData(void)
 {
   return configuration_data;
 }
