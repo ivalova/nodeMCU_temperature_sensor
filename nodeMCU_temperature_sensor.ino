@@ -77,6 +77,7 @@ void loop() {
   
   unsigned long sleep_time_s = timer_period_s - (time_client.getEpochTime() % timer_period_s);
 
+  sleep_time_s = sleep_time_s * Configuration::Instance().getConfigData().sleep_correction_factor;
   Serial.print("Sleeping for ");
   Serial.print(sleep_time_s);
   Serial.println(" seconds...");
