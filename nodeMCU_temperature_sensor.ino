@@ -10,7 +10,7 @@
 
 
 
-formFiller form_filler((const char*)&(Configuration::Instance().getConfigData().google_form_id[0]),
+formFiller form_filler((const char*) & (Configuration::Instance().getConfigData().google_form_id[0]),
                        "entry.1308355757",
                        "entry.20675324",
                        "entry.851959826",
@@ -22,6 +22,7 @@ NTPClient time_client(ntp_udp);
 
 
 void connectToWiFi(void);
+unsigned long calculateSleepTime(void);
 
 void setup() {
   Serial.begin(115200);
@@ -45,16 +46,16 @@ void loop() {
       sensors_event_t humidity, temp;
       bool is_successful = environment_sensor.getEvent(&humidity, &temp);
 
-      if(true == is_successful)
+      if (true == is_successful)
       {
         Serial.print("Temperature: ");
         Serial.println(temp.temperature);
         Serial.print("Humidity: ");
         Serial.println(humidity.relative_humidity);
-  
+
         form_filler.sendData(String(voltage), String(temp.temperature), String(humidity.relative_humidity), String());
       }
-      else 
+      else
       {
         Serial.println("Could not find a valid AHT10 sensor.");
       }
@@ -69,26 +70,19 @@ void loop() {
     connectToWiFi();
   }
 
-  time_client.forceUpdate();//todo evaluate retval
-  Serial.print("Time: ");
-  Serial.println(time_client.getFormattedTime());
-
-  const unsigned long timer_period_s = Configuration::Instance().getConfigData().update_interval_s;
+  unsigned long sleep_time_us = calculateSleepTime();
   
-  unsigned long sleep_time_s = timer_period_s - (time_client.getEpochTime() % timer_period_s);
-
-  sleep_time_s = sleep_time_s * Configuration::Instance().getConfigData().sleep_correction_factor;
   Serial.print("Sleeping for ");
   Serial.print(sleep_time_s);
   Serial.println(" seconds...");
-
-  ESP.deepSleep(sleep_time_s * 1e6); //deepSleep receives us
+  
+  ESP.deepSleep(sleep_time_us);
 }
 
 void connectToWiFi(void)
 {
-  const char* ssid = (const char*)&(Configuration::Instance().getConfigData().wifi_ssid[0]);
-  const char* password = (const char*)&(Configuration::Instance().getConfigData().wifi_password[0]);
+  const char* ssid = (const char*) & (Configuration::Instance().getConfigData().wifi_ssid[0]);
+  const char* password = (const char*) & (Configuration::Instance().getConfigData().wifi_password[0]);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to wifi ");
   Serial.println(ssid);
@@ -101,4 +95,24 @@ void connectToWiFi(void)
   Serial.println(ssid);
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
+}
+
+unsigned long calculateSleepTime(void)
+{
+  const unsigned long configured_update_period_s = Configuration::Instance().getConfigData().update_interval_s;
+
+  bool is_ntp_update_successful = time_client.forceUpdate();
+  if (is_ntp_update_successful)
+  {
+    unsigned long sleep_time_s = configured_update_period_s - (time_client.getEpochTime() % configured_update_period_s);
+
+    sleep_time_s = sleep_time_s * Configuration::Instance().getConfigData().sleep_correction_factor;
+
+    return sleep_time_s * 10 ^ 6;
+  }
+  else
+  {
+    Serial.println("NTP time update failed, using default sleep period.");
+    return configured_update_period_s * 10 ^ 6;
+  }
 }
