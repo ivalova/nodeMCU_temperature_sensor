@@ -12,7 +12,6 @@
 //param_in google_form_id           unique google form id where data is sent
 //param_in wifi_ssid                name of the wifi access point
 //param_in crc                      crc used to verify integrity of data
-
 struct ConfigurationData
 {
   uint8_t   config_magic_bytes;

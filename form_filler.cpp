@@ -5,13 +5,14 @@
 #include <ESP8266HTTPClient.h>
 #include <HardwareSerial.h>
 
-formFiller::formFiller(const String& form_id,
-                       const String& device_html_id,
+FormFiller::FormFiller(const String& device_html_id,
                        const String& voltage_html_id,
                        const String& temperature_html_id,
                        const String& humidity_html_id,
                        const String& pressure_html_id)
-  : server_name("https://docs.google.com/forms/d/e/" + form_id + "/formResponse"),
+  : server_name("https://docs.google.com/forms/d/e/" \
+                + String((const char*) & (Configuration::Instance().getConfigData().google_form_id[0])) \
+                + "/formResponse"),
     device_html_id(device_html_id),
     voltage_html_id(voltage_html_id),
     temperature_html_id(temperature_html_id),
@@ -21,7 +22,7 @@ formFiller::formFiller(const String& form_id,
   device_id = Configuration::Instance().getConfigData().device_id;
 }
 
-void formFiller::sendData(const String& voltage,
+void FormFiller::sendData(const String& voltage,
                           const String& temperature,
                           const String& humidity,
                           const String& pressure)
